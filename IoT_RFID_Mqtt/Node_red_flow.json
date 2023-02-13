@@ -1,0 +1,658 @@
+[
+    {
+        "id": "00e1e52427c2625b",
+        "type": "mqtt out",
+        "z": "41ae76cdd3811048",
+        "name": "",
+        "topic": "card_event",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "27af0e0ef79585d2",
+        "x": 470,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "a0322a8170e6ba9f",
+        "type": "inject",
+        "z": "41ae76cdd3811048",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "card_event",
+        "payload": "{\"content\":\"63B671C\",\"time_stamp\":\"\",\"in_out\":\"0\"}",
+        "payloadType": "json",
+        "x": 150,
+        "y": 80,
+        "wires": [
+            [
+                "64d10110e9a79004"
+            ]
+        ]
+    },
+    {
+        "id": "8b881e8e5adaacfe",
+        "type": "mqtt in",
+        "z": "41ae76cdd3811048",
+        "name": "",
+        "topic": "card_event",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "27af0e0ef79585d2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 260,
+        "wires": [
+            [
+                "9aac287fa788db61"
+            ]
+        ]
+    },
+    {
+        "id": "64d10110e9a79004",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "Custom input",
+        "func": "msg.payload.time_stamp = parseInt(Date.now() / 1000);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 80,
+        "wires": [
+            [
+                "00e1e52427c2625b"
+            ]
+        ]
+    },
+    {
+        "id": "bf2287e77f69d531",
+        "type": "sqlite",
+        "z": "41ae76cdd3811048",
+        "mydb": "9c9591c479620174",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "Card_Query",
+        "x": 490,
+        "y": 260,
+        "wires": [
+            [
+                "2d44503c76125e3e"
+            ]
+        ]
+    },
+    {
+        "id": "9aac287fa788db61",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "Search in Table",
+        "func": "// set payload 2 to backup the OG mqtt msg\nif(!msg.payload2) msg.payload2 = msg.payload; \n// Search card index\nmsg.topic = \"select * from Card_index where Card_Uid = '\" + msg.payload2.content + \"'\"; \n//msg.debug = \"search in table\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 260,
+        "wires": [
+            [
+                "bf2287e77f69d531"
+            ]
+        ]
+    },
+    {
+        "id": "2d44503c76125e3e",
+        "type": "switch",
+        "z": "41ae76cdd3811048",
+        "name": "If Index exists",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 660,
+        "y": 260,
+        "wires": [
+            [
+                "0fa239c0d4249f98"
+            ],
+            [
+                "d8799a1f6bfcd2b5"
+            ]
+        ]
+    },
+    {
+        "id": "0fa239c0d4249f98",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "Insert New Card into Table",
+        "func": "msg.topic = \"INSERT INTO Card_index(Card_Uid) VALUES('\" + msg.payload2.content + \"')\"; \n//msg.debug = \"insert new card\";\nreturn msg;\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 240,
+        "wires": [
+            [
+                "79a0e46ddd06f6c5"
+            ]
+        ]
+    },
+    {
+        "id": "79a0e46ddd06f6c5",
+        "type": "sqlite",
+        "z": "41ae76cdd3811048",
+        "mydb": "9c9591c479620174",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 1010,
+        "y": 160,
+        "wires": [
+            [
+                "9aac287fa788db61"
+            ]
+        ]
+    },
+    {
+        "id": "bca5c14a633e5403",
+        "type": "sqlite",
+        "z": "41ae76cdd3811048",
+        "mydb": "9c9591c479620174",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 830,
+        "y": 400,
+        "wires": [
+            [
+                "996391323a5ba861",
+                "e46f945ede4d1d59"
+            ]
+        ]
+    },
+    {
+        "id": "db06fabe39c8981e",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "card entry",
+        "func": "// Card no previous record ( previous in_out = NULL )  \nmsg.topic = \"INSERT INTO time_log(Card_index, timestamp, in_out) VALUES(\" + msg.card_index + \", \" + msg.payload2.time_stamp + \", 1)\";\nmsg.debug = \"card entry\";\nreturn msg;\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 380,
+        "wires": [
+            [
+                "bca5c14a633e5403"
+            ]
+        ]
+    },
+    {
+        "id": "afb627e09d125472",
+        "type": "sqlite",
+        "z": "41ae76cdd3811048",
+        "mydb": "9c9591c479620174",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 410,
+        "y": 580,
+        "wires": [
+            [
+                "ef6b94ce545abe38"
+            ]
+        ]
+    },
+    {
+        "id": "e46f945ede4d1d59",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "card indexes",
+        "func": "// Gather all card indexes, prepare the data for the table\nmsg.topic = \"select * from Card_index\";\n//msg.debug = \"card indexes\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 580,
+        "wires": [
+            [
+                "afb627e09d125472"
+            ]
+        ]
+    },
+    {
+        "id": "a5f2f32361ef58d7",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "ui table prepare",
+        "func": "// Prepare Table \nvar result; // Searching card index\nfor (result of msg.actives) { \n    //Replace card index with actual UID\n    result.Card_index = msg.payload2.find(searchitem => searchitem.Indexes === result.Card_index).Card_Uid;\n    result.timestamp = new Date(result.timestamp * 1000); // Convert timestamp to human readable entry  \n}\nmsg.payload = msg.actives; // Give actives as payload to the table  \n//msg.debug = \"ui table prepare\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1100,
+        "y": 800,
+        "wires": [
+            [
+                "8f64d422c8c48e24"
+            ]
+        ]
+    },
+    {
+        "id": "8f64d422c8c48e24",
+        "type": "ui_table",
+        "z": "41ae76cdd3811048",
+        "group": "aa9f5765553e2e53",
+        "name": "",
+        "order": 0,
+        "width": "4",
+        "height": "3",
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 1310,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "5abbf0037b7b0906",
+        "type": "switch",
+        "z": "41ae76cdd3811048",
+        "name": "Check in_out",
+        "property": "payload[0].in_out",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 490,
+        "y": 420,
+        "wires": [
+            [
+                "db06fabe39c8981e"
+            ],
+            [
+                "1ac89956e6b77c59"
+            ]
+        ]
+    },
+    {
+        "id": "d8799a1f6bfcd2b5",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "ask last record of this card",
+        "func": "// Select the last state of the card (in or out) \nmsg.topic = \"SELECT * FROM time_log WHERE Card_index=\" + msg.payload[0].Indexes +\" ORDER BY timestamp DESC LIMIT 1\";\n// msg.debug = \"last record\";\nmsg.card_index = msg.payload[0].Indexes; // Backup card index\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 280,
+        "wires": [
+            [
+                "2a26e94dabc4dae2"
+            ]
+        ]
+    },
+    {
+        "id": "2a26e94dabc4dae2",
+        "type": "sqlite",
+        "z": "41ae76cdd3811048",
+        "mydb": "9c9591c479620174",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 1090,
+        "y": 280,
+        "wires": [
+            [
+                "f11dba224bc7fd24"
+            ]
+        ]
+    },
+    {
+        "id": "1ac89956e6b77c59",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "card exit",
+        "func": "// Calculate time duration  \nmsg.duration = new Date(msg.payload2.time_stamp - msg.payload[0].timestamp);\nmsg.seconds = msg.duration; // / 1000; \nmsg.hours = parseInt(msg.seconds / 3600);\nmsg.seconds = msg.seconds % 3600;\nmsg.minutes = parseInt(msg.seconds / 60);\nmsg.seconds = parseInt(msg.seconds % 60);\nmsg.duration = String(msg.hours) + \":\" + String(msg.minutes) + \":\" + String(msg.seconds);\n// Set in_out to 0 (exit)\nmsg.topic = \"INSERT INTO time_log(Card_index, timestamp, in_out) VALUES(\" + msg.card_index + \", \" + msg.payload2.time_stamp + \", 0)\";\n//msg.debug = \"card exit\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 440,
+        "wires": [
+            [
+                "bca5c14a633e5403"
+            ]
+        ]
+    },
+    {
+        "id": "996391323a5ba861",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "mqtt messages",
+        "func": "msg.topic = \"reader_event\";\nif(msg.duration) msg.payload = \"Goodbye total time: \" + msg.duration;\nelse msg.payload = \"Welcome, timer started.\"\n//msg.debug = \"mqtt messages\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 400,
+        "wires": [
+            [
+                "397fb813e5843ac0",
+                "6193dc6958e0ad68"
+            ]
+        ]
+    },
+    {
+        "id": "397fb813e5843ac0",
+        "type": "mqtt out",
+        "z": "41ae76cdd3811048",
+        "name": "",
+        "topic": "reader_event",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "cd1013eb26ec7cc9",
+        "x": 1230,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "f11dba224bc7fd24",
+        "type": "switch",
+        "z": "41ae76cdd3811048",
+        "name": "Prev record exist",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 290,
+        "y": 380,
+        "wires": [
+            [
+                "db06fabe39c8981e"
+            ],
+            [
+                "5abbf0037b7b0906"
+            ]
+        ]
+    },
+    {
+        "id": "6193dc6958e0ad68",
+        "type": "debug",
+        "z": "41ae76cdd3811048",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1240,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "1421a4fb6eecf986",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "Start loop (part 1)",
+        "func": "// Start getting the last record of each card index   \nmsg.topic = \"SELECT * FROM time_log WHERE Card_index = \" + msg.payload2[msg.current].Indexes + \" ORDER BY timestamp DESC LIMIT 1\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 700,
+        "wires": [
+            [
+                "6aa8c2fe7cc7626c"
+            ]
+        ]
+    },
+    {
+        "id": "6aa8c2fe7cc7626c",
+        "type": "sqlite",
+        "z": "41ae76cdd3811048",
+        "mydb": "9c9591c479620174",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 430,
+        "y": 700,
+        "wires": [
+            [
+                "af948f179c042a4f"
+            ]
+        ]
+    },
+    {
+        "id": "a80b57e42ccee38e",
+        "type": "switch",
+        "z": "41ae76cdd3811048",
+        "name": "If current less than card records next card",
+        "property": "current",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": "payload2.length",
+                "vt": "msg"
+            },
+            {
+                "t": "gte",
+                "v": "payload2.length",
+                "vt": "msg"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 440,
+        "y": 800,
+        "wires": [
+            [
+                "1421a4fb6eecf986"
+            ],
+            [
+                "a5f2f32361ef58d7"
+            ]
+        ]
+    },
+    {
+        "id": "af948f179c042a4f",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "Check in_out ( loop part 2)",
+        "func": "// If card is in (in_out = 1) add to the active card array \nif(msg.payload[0].in_out) msg.actives.push(msg.payload[0]);\nmsg.current = msg.current + 1; // increment the current index\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 700,
+        "wires": [
+            [
+                "a80b57e42ccee38e"
+            ]
+        ]
+    },
+    {
+        "id": "ef6b94ce545abe38",
+        "type": "function",
+        "z": "41ae76cdd3811048",
+        "name": "Backup Card index payload",
+        "func": "// keep the card indexes \nmsg.payload2 = msg.payload;\nmsg.current = 0; // prepare loop\nmsg.actives = []; // array for the active cards\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 580,
+        "wires": [
+            [
+                "1421a4fb6eecf986"
+            ]
+        ]
+    },
+    {
+        "id": "27af0e0ef79585d2",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "9c9591c479620174",
+        "type": "sqlitedb",
+        "db": "Cards",
+        "mode": "RWC"
+    },
+    {
+        "id": "aa9f5765553e2e53",
+        "type": "ui_group",
+        "name": "Card Numbers & Timestamp",
+        "tab": "e8e7e5b31a579a77",
+        "order": 1,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "cd1013eb26ec7cc9",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "e8e7e5b31a579a77",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
